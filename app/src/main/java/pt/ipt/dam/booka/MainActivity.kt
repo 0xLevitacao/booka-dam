@@ -14,15 +14,21 @@ import androidx.core.content.ContextCompat
 import com.google.mlkit.vision.barcode.BarcodeScanning
 import com.google.mlkit.vision.barcode.common.Barcode
 import com.google.mlkit.vision.common.InputImage
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import pt.ipt.dam.booka.data.api.RetrofitInstance
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
-
+import coil.load
 @androidx.annotation.OptIn(androidx.camera.core.ExperimentalGetImage::class)
 class MainActivity : AppCompatActivity() {
 
     private lateinit var previewView: PreviewView
     private lateinit var textResult: TextView
     private lateinit var cameraExecutor: ExecutorService
+    private var isProcessing = false
 
     companion object {
         private const val CAMERA_PERMISSION_CODE = 100
@@ -113,10 +119,9 @@ class MainActivity : AppCompatActivity() {
         }, ContextCompat.getMainExecutor(this))
     }
 
-
     private fun processImageProxy(imageProxy: ImageProxy) {
         val mediaImage = imageProxy.image
-        if (mediaImage != null) {
+        if (mediaImage != null && !isProcessing) {
             val image = InputImage.fromMediaImage(
                 mediaImage,
                 imageProxy.imageInfo.rotationDegrees
@@ -130,17 +135,15 @@ class MainActivity : AppCompatActivity() {
                         when (barcode.valueType) {
                             Barcode.TYPE_ISBN -> {
                                 val isbn = barcode.rawValue
-                                runOnUiThread {
-                                    textResult.text = "ISBN encontrado: $isbn"
+                                if (isbn != null) {
+                                    fetchBookInfo(isbn)
                                 }
                             }
                             Barcode.TYPE_TEXT,
                             Barcode.TYPE_PRODUCT -> {
                                 val code = barcode.rawValue
                                 if (code != null && (code.length == 10 || code.length == 13)) {
-                                    runOnUiThread {
-                                        textResult.text = "Código encontrado: $code"
-                                    }
+                                    fetchBookInfo(code)
                                 }
                             }
                         }
@@ -152,6 +155,74 @@ class MainActivity : AppCompatActivity() {
         } else {
             imageProxy.close()
         }
+    }
+
+    private fun fetchBookInfo(isbn: String) {
+        isProcessing = true
+
+        runOnUiThread {
+            textResult.text = "A procurar livro com ISBN: $isbn..."
+        }
+
+        CoroutineScope(Dispatchers.IO).launch {
+            try {
+                val response = RetrofitInstance.api.searchBookByISBN("isbn:$isbn")
+
+                withContext(Dispatchers.Main) {
+                    if (response.items != null && response.items.isNotEmpty()) {
+                        val book = response.items[0].volumeInfo
+                        showBookDialog(book)
+                    } else {
+                        textResult.text = "Livro não encontrado para ISBN: $isbn"
+                        isProcessing = false
+                    }
+                }
+            } catch (e: Exception) {
+                withContext(Dispatchers.Main) {
+                    textResult.text = "Erro ao procurar livro: ${e.message}"
+                    isProcessing = false
+                }
+            }
+        }
+    }
+
+    private fun showBookDialog(book: pt.ipt.dam.booka.data.api.VolumeInfo) {
+        val dialog = android.app.AlertDialog.Builder(this)
+        val dialogView = layoutInflater.inflate(R.layout.dialog_book_info, null)
+
+        val ivBookCover = dialogView.findViewById<android.widget.ImageView>(R.id.ivBookCover)
+        val tvTitle = dialogView.findViewById<TextView>(R.id.tvTitle)
+        val tvAuthor = dialogView.findViewById<TextView>(R.id.tvAuthor)
+        val tvYear = dialogView.findViewById<TextView>(R.id.tvYear)
+        val tvDescription = dialogView.findViewById<TextView>(R.id.tvDescription)
+        val btnCancel = dialogView.findViewById<android.widget.Button>(R.id.btnCancel)
+        val btnAddToFavorites = dialogView.findViewById<android.widget.Button>(R.id.btnAddToFavorites)
+
+        // test
+        ivBookCover.load(book.imageLinks?.thumbnail?.replace("http://", "https://"))
+
+        tvTitle.text = book.title ?: "Título desconhecido"
+        tvAuthor.text = book.authors?.joinToString(", ") ?: "Autor desconhecido"
+        tvYear.text = book.publishedDate ?: "Ano desconhecido"
+        tvDescription.text = book.description ?: "Sem descrição disponível"
+
+        val alertDialog = dialog.setView(dialogView).create()
+
+        btnCancel.setOnClickListener {
+            alertDialog.dismiss()
+            isProcessing = false
+            textResult.text = "Aponte para um código de barras ISBN"
+        }
+
+        btnAddToFavorites.setOnClickListener {
+            // TODO: Guardar na base de dados
+            Toast.makeText(this, "Livro adicionado aos favoritos!", Toast.LENGTH_SHORT).show()
+            alertDialog.dismiss()
+            isProcessing = false
+            textResult.text = "Aponte para um código de barras ISBN"
+        }
+
+        alertDialog.show()
     }
 
     override fun onDestroy() {

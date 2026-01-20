@@ -23,7 +23,7 @@
         android:background="#CC000000"
         android:gravity="center"
         android:padding="16dp"
-        android:text="Aponta para um código de barras ISBN"
+        android:text="Aponte para um código de barras ISBN"
         android:textColor="#FFFFFF"
         android:textSize="16sp"
         app:layout_constraintBottom_toBottomOf="parent"
