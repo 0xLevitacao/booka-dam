@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item
+        android:id="@+id/bibliotecaFragment"
+        android:icon="@android:drawable/ic_menu_agenda"
+        android:title="Biblioteca" />
+
+    <item
+        android:id="@+id/scannerFragment"
+        android:icon="@android:drawable/ic_menu_camera"
+        android:title="Scanner" />
+
+    <item
+        android:id="@+id/acercaFragment"
+        android:icon="@android:drawable/ic_menu_info_details"
+        android:title="Acerca" />
+
+</menu>

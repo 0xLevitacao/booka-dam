@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/nav_graph"
+    app:startDestination="@id/bibliotecaFragment">
+
+    <fragment
+        android:id="@+id/bibliotecaFragment"
+        android:name="pt.ipt.dam.booka.ui.BibliotecaFragment"
+        android:label="Biblioteca" />
+
+    <fragment
+        android:id="@+id/scannerFragment"
+        android:name="pt.ipt.dam.booka.ui.ScannerFragment"
+        android:label="Scanner" />
+
+    <fragment
+        android:id="@+id/acercaFragment"
+        android:name="pt.ipt.dam.booka.ui.AcercaFragment"
+        android:label="Acerca" />
+
+</navigation>
