@@ -3,17 +3,17 @@
 
     <item
         android:id="@+id/bibliotecaFragment"
-        android:icon="@android:drawable/ic_menu_agenda"
+        android:icon="@drawable/navbar_biblioteca"
         android:title="Biblioteca" />
 
     <item
         android:id="@+id/scannerFragment"
-        android:icon="@android:drawable/ic_menu_camera"
+        android:icon="@drawable/navbar_scanner"
         android:title="Scanner" />
 
     <item
         android:id="@+id/acercaFragment"
-        android:icon="@android:drawable/ic_menu_info_details"
+        android:icon="@drawable/navbar_acerca"
         android:title="Acerca" />
 
 </menu>
