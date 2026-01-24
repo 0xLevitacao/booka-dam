@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.EditText
 import android.widget.SearchView
 import android.widget.TextView
 import android.widget.Toast
@@ -64,6 +65,7 @@ class BibliotecaFragment : Fragment() {
         loadBooks()
     }
 
+    //carrega a lista de livros
     override fun onResume() {
         super.onResume()
         loadBooks()
@@ -74,10 +76,13 @@ class BibliotecaFragment : Fragment() {
         filterBooks(searchView.query.toString())
     }
 
+    //Função de pesquisa para a barra de navegação do ecrã Biblioteca
     private fun filterBooks(query: String) {
+        //sem nada escrito
         val filteredBooks = if (query.isEmpty()) {
             allBooks
         } else {
+            //introduz autor ou titulo
             allBooks.filter { book ->
                 book.titulo.contains(query, ignoreCase = true) ||
                         book.autor?.contains(query, ignoreCase = true) == true
@@ -124,6 +129,7 @@ class BibliotecaFragment : Fragment() {
             alertDialog.dismiss()
         }
 
+        //remover o livro dos favoritos
         btnRemove.setOnClickListener {
             AlertDialog.Builder(requireContext())
                 .setTitle("Remover livro")

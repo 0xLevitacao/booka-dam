@@ -237,6 +237,7 @@ class ScannerFragment : Fragment() {
             textResult.text = "Aponte para um código de barras ISBN"
         }
 
+        //adicionar livro aos favoritos
         btnAddToFavorites.setOnClickListener {
             // Verificar se já existe
             if (dbHelper.bookExists(isbn)) {
